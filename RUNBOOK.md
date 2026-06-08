@@ -1,0 +1,63 @@
+# RUNBOOK — running t-bot (paper trading first)
+
+This bot runs via **Docker** (the official Freqtrade image), so you do **not** need a
+matching Python version or to compile TA-Lib locally.
+
+> **Current mode: DRY-RUN (paper trading).** `dry_run: true` in `user_data/config.json`.
+> No real orders are sent and no API keys are required. It trades a simulated
+> $1000 wallet against **live** Binance market data.
+
+## Prerequisites
+- Docker Desktop running.
+- (Region note) If Binance market data is blocked where you are, change
+  `exchange.name` in `user_data/config.json` to `kraken` or `coinbase` and adjust
+  the `pair_whitelist` (e.g. `BTC/USD` instead of `BTC/USDT`).
+
+## 1. Pull the image
+```bash
+docker compose pull
+```
+
+## 2. (Recommended) Download data + backtest before paper trading
+The plan says validate before trusting it. Download history and run a backtest:
+```bash
+# download ~1 year of 1h candles for the whitelisted pairs
+docker compose run --rm freqtrade download-data --timeframe 1h --days 365 --config /freqtrade/user_data/config.json
+
+# backtest the strategy over that data
+docker compose run --rm freqtrade backtesting --strategy MomentumStrategy --timeframe 1h --config /freqtrade/user_data/config.json
+```
+Read the output: focus on **profit, max drawdown, expectancy, Sharpe** — not win rate.
+
+## 3. Start live paper trading (dry-run)
+```bash
+docker compose up -d
+```
+- Logs: `docker compose logs -f` (or see `user_data/logs/freqtrade.log`)
+- Stop: `docker compose down`
+
+## 4. Web UI (optional)
+The REST API / FreqUI is exposed at <http://127.0.0.1:8080> (localhost only).
+**Before exposing it, change** `jwt_secret_key`, `ws_token`, and `password` in the
+`api_server` block of `config.json`.
+
+## 5. Walk-forward validation (the make-or-break gate, see PLAN.md Stage 3)
+```bash
+docker compose run --rm freqtrade backtesting \
+  --strategy MomentumStrategy --timeframe 1h \
+  --timerange 20240101-20241231 \
+  --config /freqtrade/user_data/config.json
+```
+Re-run across rolling windows and compare in-sample vs out-of-sample Sharpe.
+If out-of-sample Sharpe drops >30–50%, the edge is likely overfit — go back to the
+strategy and try a different hypothesis.
+
+## Safety checklist before EVER going live with real money
+- [ ] Backtested with realistic fees + slippage
+- [ ] Survived walk-forward (out-of-sample Sharpe holds up)
+- [ ] Paper-traded for several weeks; live-paper matches backtest
+- [ ] Hard risk limits in place (per-trade ≤1%, daily loss kill-switch)
+- [ ] API keys stored in a gitignored file, **withdrawal permission disabled**
+- [ ] Start with capital you can afford to lose entirely
+
+*Informational and educational only. Not financial advice.*
