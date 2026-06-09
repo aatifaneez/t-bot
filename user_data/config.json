@@ -73,16 +73,16 @@
     },
 
     "api_server": {
-        "enabled": true,
-        "listen_ip_address": "0.0.0.0",
+        "enabled": false,
+        "listen_ip_address": "127.0.0.1",
         "listen_port": 8080,
         "verbosity": "error",
         "enable_openapi": false,
-        "jwt_secret_key": "CHANGE_ME_random_string",
-        "ws_token": "CHANGE_ME_random_token",
+        "jwt_secret_key": "REPLACE_WITH_YOUR_OWN_RANDOM_32PLUS_CHAR_SECRET",
+        "ws_token": "REPLACE_WITH_YOUR_OWN_RANDOM_WS_TOKEN_VALUE",
         "CORS_origins": [],
         "username": "freqtrader",
-        "password": "CHANGE_ME_password"
+        "password": "REPLACE_WITH_YOUR_OWN_PASSWORD"
     },
 
     "bot_name": "t-bot",

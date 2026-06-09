@@ -1,11 +1,42 @@
 # RUNBOOK — running t-bot (paper trading first)
 
-This bot runs via **Docker** (the official Freqtrade image), so you do **not** need a
-matching Python version or to compile TA-Lib locally.
+There are two ways to run this bot. Pick ONE.
+
+- **Option A — Native Python venv (current setup).** Python 3.12 venv at
+  `C:\Users\silve\venvs\t-bot`, driven by `scripts\tbot.ps1`. Use this since Docker
+  Desktop was crashing on this machine.
+- **Option B — Docker** (the official Freqtrade image): no local Python/TA-Lib needed,
+  but requires Docker Desktop to be working. See the Docker section below.
 
 > **Current mode: DRY-RUN (paper trading).** `dry_run: true` in `user_data/config.json`.
 > No real orders are sent and no API keys are required. It trades a simulated
 > $1000 wallet against **live** Binance market data.
+
+---
+
+## Option A — Native Python venv (recommended here)
+
+A helper script wraps the venv so you don't have to remember paths.
+
+```powershell
+# from the repo root
+.\scripts\tbot.ps1 version     # confirm freqtrade is installed
+.\scripts\tbot.ps1 download    # download ~1 year of 1h candles
+.\scripts\tbot.ps1 backtest    # backtest MomentumStrategy (check Sharpe/drawdown/expectancy)
+.\scripts\tbot.ps1 trade       # START live PAPER trading (dry-run)
+```
+
+To stop paper trading: press `Ctrl+C` in the terminal running `trade`.
+Logs stream to the console; the dry-run trade DB is `user_data\tradesv3.dryrun.sqlite`.
+
+If you ever need a raw freqtrade command:
+```powershell
+.\scripts\tbot.ps1 raw <any freqtrade args...>
+```
+
+---
+
+## Option B — Docker
 
 ## Prerequisites
 - Docker Desktop running.
