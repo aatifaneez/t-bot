@@ -23,10 +23,26 @@ A helper script wraps the venv so you don't have to remember paths.
 .\scripts\tbot.ps1 version     # confirm freqtrade is installed
 .\scripts\tbot.ps1 download    # download ~1 year of 1h candles
 .\scripts\tbot.ps1 backtest    # backtest MomentumStrategy (check Sharpe/drawdown/expectancy)
-.\scripts\tbot.ps1 trade       # START live PAPER trading (dry-run)
+.\scripts\tbot.ps1 paper       # START live PAPER trading + web dashboard  <-- recommended
+.\scripts\tbot.ps1 stop        # stop a running bot (frees port 8080)
 ```
 
-To stop paper trading: press `Ctrl+C` in the terminal running `trade`.
+### Watching it live (FreqUI dashboard)
+`paper` enables the web dashboard. Open **http://127.0.0.1:8080** in your browser and
+log in with the username/password from `user_data/config.private.json`. There you can
+see open/closed trades, live P&L, charts, and use **Force enter / Force exit** buttons.
+
+The first run of `paper` auto-creates `config.private.json` from
+`config.private.example.json`. **Edit it and set your own `jwt_secret_key`, `ws_token`,
+`username`, and `password`** (the real file is gitignored, so secrets never get committed).
+
+### IMPORTANT: keep the bot alive
+The bot only runs while its process is alive. Launch `paper` in a **terminal window you
+keep open** — closing it (or `Ctrl+C`) stops the bot, and nothing trades while it's down.
+For an overnight/multi-day paper test, leave that window running. (Background/agent-started
+processes get cleaned up and will NOT keep running.)
+
+To stop paper trading: `Ctrl+C` in the window, or `.\scripts\tbot.ps1 stop`.
 Logs stream to the console; the dry-run trade DB is `user_data\tradesv3.dryrun.sqlite`.
 
 If you ever need a raw freqtrade command:
